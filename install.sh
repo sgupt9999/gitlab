@@ -5,7 +5,7 @@
 # Start of user inputs
 SELFSIGNEDCERT="yes"
 #SELFSIGNEDCERT="no"
-SERVERFQDN="garfield99991.mylabserver.com"
+SERVERFQDN="garfield99992.mylabserver.com"
 
 # Firewalld should be up and running to make changes
 FIREWALL="yes"
@@ -18,8 +18,8 @@ then
 	echo
 	echo "##########################################################"
 	echo "ERROR. You need to have root privileges to run this script"
-	exit 1
 	echo "##########################################################"
+	exit 1
 else
 	echo
 	echo "##############################################"
@@ -122,5 +122,12 @@ then
 	chmod 700 /etc/gitlab/ssl
 	mv ./gitlabserver.* /etc/gitlab/ssl/
 
-	sed -i "s/^\(external_url\).*/external_url https://$SERVERFQDN" /etc/gitlab/gitlab.rb
+	sed -i "s/^\(external_url\).*/external_url \'https:\/\/$SERVERFQDN\'/" /etc/gitlab/gitlab.rb
+	sed -i "/ssl_certificate/s/#{node\['fqdn'\]}/gitlabserver/" /etc/gitlab/gitlab.rb 
+fi
+
+echo
+echo "##############################################"
+echo "Reconfiguring gitlab"
+gitlab-ctl reconfigure
 	
