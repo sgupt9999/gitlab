@@ -5,11 +5,11 @@
 # Start of user inputs
 SELFSIGNEDCERT="yes"
 #SELFSIGNEDCERT="no"
-SERVERFQDN="garfield99992.mylabserver.com"
+SERVERFQDN="garfield99996.mylabserver.com"
 
 # Firewalld should be up and running to make changes
 FIREWALL="yes"
-FIREWALL="no"
+#FIREWALL="no"
 # End of user inputs
 #####################################################################
 
@@ -45,12 +45,14 @@ then
 	if systemctl -q is-active firewalld
 	then
 		echo
-		echo "##################################"
-		echo "Adding http service to the firewall"
+		echo "##############################################"
+		echo "Adding http and https services to the firewall"
 		firewall-cmd --permanent --add-service http
 		firewall-cmd --reload
+		firewall-cmd --permanent --add-service https
+		firewall-cmd --reload
 		echo "Done"
-		echo "##################################"
+		echo "##############################################"
 	else
 		echo
 		echo "######################################################"
@@ -124,10 +126,13 @@ then
 
 	sed -i "s/^\(external_url\).*/external_url \'https:\/\/$SERVERFQDN\'/" /etc/gitlab/gitlab.rb
 	sed -i "/ssl_certificate/s/#{node\['fqdn'\]}/gitlabserver/" /etc/gitlab/gitlab.rb 
+	sed -i "/ssl_certificate/s/#[ \t]*//" /etc/gitlab/gitlab.rb
 fi
 
 echo
-echo "##############################################"
+echo "####################"
 echo "Reconfiguring gitlab"
 gitlab-ctl reconfigure
+echo "Done"
+echo "####################"
 	
