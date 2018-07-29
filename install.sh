@@ -35,7 +35,7 @@ INSTALLPACKAGES3="gitlab-ce"
 echo
 echo "#####################################################################################"
 echo "Installing base packages - $INSTALLPACKAGES1"
-yum install -y $INSTALLPACKAGES1 
+yum install -y $INSTALLPACKAGES1 -q > /dev/null 2>&1
 echo "Done"
 sleep 2
 echo "#####################################################################################"
@@ -47,10 +47,10 @@ then
 		echo
 		echo "##############################################"
 		echo "Adding http and https services to the firewall"
-		firewall-cmd --permanent --add-service http
-		firewall-cmd --reload
-		firewall-cmd --permanent --add-service https
-		firewall-cmd --reload
+		firewall-cmd -q --permanent --add-service http
+		firewall-cmd -q --reload
+		firewall-cmd -q --permanent --add-service https
+		firewall-cmd -q --reload
 		echo "Done"
 		echo "##############################################"
 	else
@@ -71,7 +71,7 @@ then
 	echo 	
 	echo "############################"
 	echo "Removing old copy of postfix"	
-	yum remove -y $INSTALLPACKAGES2
+	yum remove -y $INSTALLPACKAGES2 -q > /dev/null 2>&1
 	rm -rf /var/spool/postfix
 	echo "Done"
 	echo "############################"
@@ -82,7 +82,7 @@ fi
 echo
 echo "##################"
 echo "Installing $INSTALLPACKAGES2"
-yum install -y $INSTALLPACKAGES2 
+yum install -y $INSTALLPACKAGES2  -q > /dev/null 2>&1
 echo "Done"
 sleep 2
 echo "##################"
@@ -95,7 +95,7 @@ then
 	echo
 	echo "################################"
 	echo "Removing old instances of gitlab"
-	yum remove -y $INSTALLPACKAGES3
+	yum remove -y $INSTALLPACKAGES3 -q > /dev/null 2>&1
 	rm -rf /etc/gitlab
 	rm -rf /var/log/gitlab
 	rm -rf /etc/yum.repos.d/gitlab_gitlab-ce.repo
