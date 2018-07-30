@@ -7,7 +7,7 @@
 SELFSIGNEDCERT="no"
 LETSENCRYPT="yes"
 #LETSENCRYPT="no"
-DOMAIN="garfield99991.mylabserver.com"
+DOMAIN="garfield99993.mylabserver.com"
 ADMIN_EMAIL="sgupt9999@gmail.com"
 
 # Firewalld should be up and running to make changes
