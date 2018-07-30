@@ -7,7 +7,7 @@
 SELFSIGNEDCERT="no"
 LETSENCRYPT="yes"
 #LETSENCRYPT="no"
-DOMAIN="ec2-52-35-158-97.us-west-2.compute.amazonaws.com"
+DOMAIN="garfield99991.mylabserver.com"
 ADMIN_EMAIL="sgupt9999@gmail.com"
 
 # Firewalld should be up and running to make changes
@@ -108,6 +108,37 @@ then
 	echo "################################"
 fi
 
+if [[ $LETSENCRYPT == "yes" ]]
+then
+	# Use LetsEncrypt to get a certificate
+	if yum list installed certbot > /dev/null 2>&1
+	then
+		echo 
+		echo "############################"
+		echo "Removing old copy of certbot"
+		yum remove -y certbot
+		rm -rf /etc/letsencrypt
+		echo "Done"
+		echo "############################"
+	fi
+
+	echo
+	echo "#######################################################################"
+	echo "Installing epel repo and $INSTALLPACKAGES4 for Lets Encrypt certificate"
+	yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+	sleep 3
+	# This package is only available in Centos Base
+	yum install -y https://rpmfind.net/linux/centos/7.5.1804/os/x86_64/Packages/python-zope-interface-4.0.5-4.el7.x86_64.rpm
+	yum install $INSTALLPACKAGES4 -y 
+	sleep 3
+	echo "certbot certonly -n --standalone -d $DOMAIN --agree-tos --email $ADMIN_EMAIL"
+	certbot certonly -n --standalone -d $DOMAIN --agree-tos --email $ADMIN_EMAIL
+	echo "Done"
+	echo "#######################################################################"
+
+
+fi
+
 # Install gitlab
 echo 
 echo "################################################"
@@ -133,33 +164,9 @@ then
 	sed -i "/ssl_certificate/s/#[ \t]*//" /etc/gitlab/gitlab.rb
 fi
 
+
 if [[ $LETSENCRYPT == "yes" ]]
 then
-	# Use LetsEncrypt to get a certificate
-	if yum list installed certbot > /dev/null 2>&1
-	then
-		echo 
-		echo "############################"
-		echo "Removing old copy of certbot"
-		yum remove -y certbot
-		rm -rf /etc/letsencrypt
-		echo "Done"
-		echo "############################"
-	fi
-
-	echo
-	echo "#######################################################################"
-	echo "Installing epel repo and $INSTALLPACKAGES4 for Lets Encrypt certificate"
-	yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-	sleep 3
-	# This package is only available in Centos Base
-	yum install https://rpmfind.net/linux/centos/7.5.1804/os/x86_64/Packages/python-zope-interface-4.0.5-4.el7.x86_64.rpm
-	yum install $INSTALLPACKAGES4 -y 
-	sleep 3
-	certbot certonly -d $DOMAIN --agree-tos -m $ADMIN_EMAIL	--standalone
-	echo "Done"
-	echo "#######################################################################"
-
 
 	sed -i "s/^\(external_url\).*/external_url \'https:\/\/$DOMAIN\'/" /etc/gitlab/gitlab.rb
 	sed -i "/ssl_certificate/s/etc.*crt/etc\/letsencrypt\/live\/$DOMAIN\/fullchaim.pem/"
