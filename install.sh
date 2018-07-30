@@ -3,9 +3,12 @@
 # This script will install community edition of gitlab on this server
 #####################################################################
 # Start of user inputs
-SELFSIGNEDCERT="yes"
-#SELFSIGNEDCERT="no"
-SERVERFQDN="garfield99996.mylabserver.com"
+#SELFSIGNEDCERT="yes"
+SELFSIGNEDCERT="no"
+LETSENCRYPT="yes"
+#LETSENCRYPT="no"
+DOMAIN="ec2-52-35-158-97.us-west-2.compute.amazonaws.com"
+ADMIN_EMAIL="sgupt9999@gmail.com"
 
 # Firewalld should be up and running to make changes
 FIREWALL="yes"
@@ -31,11 +34,12 @@ INSTALLPACKAGES1="curl policycoreutils-python openssh-server openssh-clients lyn
 INSTALLPACKAGES2="postfix"
 GITLABFILE="https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.rpm.sh"
 INSTALLPACKAGES3="gitlab-ce"
+INSTALLPACKAGES4="certbot"
 
 echo
 echo "#####################################################################################"
 echo "Installing base packages - $INSTALLPACKAGES1"
-yum install -y $INSTALLPACKAGES1 -q > /dev/null 2>&1
+yum install -y $INSTALLPACKAGES1
 echo "Done"
 sleep 2
 echo "#####################################################################################"
@@ -71,7 +75,7 @@ then
 	echo 	
 	echo "############################"
 	echo "Removing old copy of postfix"	
-	yum remove -y $INSTALLPACKAGES2 -q > /dev/null 2>&1
+	yum remove -y $INSTALLPACKAGES2
 	rm -rf /var/spool/postfix
 	echo "Done"
 	echo "############################"
@@ -82,7 +86,7 @@ fi
 echo
 echo "##################"
 echo "Installing $INSTALLPACKAGES2"
-yum install -y $INSTALLPACKAGES2  -q > /dev/null 2>&1
+yum install -y $INSTALLPACKAGES2 
 echo "Done"
 sleep 2
 echo "##################"
@@ -124,10 +128,46 @@ then
 	chmod 700 /etc/gitlab/ssl
 	mv ./gitlabserver.* /etc/gitlab/ssl/
 
-	sed -i "s/^\(external_url\).*/external_url \'https:\/\/$SERVERFQDN\'/" /etc/gitlab/gitlab.rb
+	sed -i "s/^\(external_url\).*/external_url \'https:\/\/$DOMAIN\'/" /etc/gitlab/gitlab.rb
 	sed -i "/ssl_certificate/s/#{node\['fqdn'\]}/gitlabserver/" /etc/gitlab/gitlab.rb 
 	sed -i "/ssl_certificate/s/#[ \t]*//" /etc/gitlab/gitlab.rb
 fi
+
+if [[ $LETSENCRYPT == "yes" ]]
+then
+	# Use LetsEncrypt to get a certificate
+	if yum list installed certbot > /dev/null 2>&1
+	then
+		echo 
+		echo "############################"
+		echo "Removing old copy of certbot"
+		yum remove -y certbot
+		rm -rf /etc/letsencrypt
+		echo "Done"
+		echo "############################"
+	fi
+
+	echo
+	echo "#######################################################################"
+	echo "Installing epel repo and $INSTALLPACKAGES4 for Lets Encrypt certificate"
+	yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+	sleep 3
+	# This package is only available in Centos Base
+	yum install https://rpmfind.net/linux/centos/7.5.1804/os/x86_64/Packages/python-zope-interface-4.0.5-4.el7.x86_64.rpm
+	yum install $INSTALLPACKAGES4 -y 
+	sleep 3
+	certbot certonly -d $DOMAIN --agree-tos -m $ADMIN_EMAIL	--standalone
+	echo "Done"
+	echo "#######################################################################"
+
+
+	sed -i "s/^\(external_url\).*/external_url \'https:\/\/$DOMAIN\'/" /etc/gitlab/gitlab.rb
+	sed -i "/ssl_certificate/s/etc.*crt/etc\/letsencrypt\/live\/$DOMAIN\/fullchaim.pem/"
+	sed -i "/ssl_certificate/s/etc.*key/etc\/letsencrypt\/live\/$DOMAIN\/privkey.pem/" 
+	sed -i "/ssl_certificate/s/#[ \t]*//" /etc/gitlab/gitlab.rb
+
+fi
+
 
 echo
 echo "####################"
