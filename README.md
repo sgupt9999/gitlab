@@ -1,5 +1,5 @@
 # gitlab
-Installing gitlab with lets encrypt certificate
+Installing gitlab with lets encrypt  or a self-signed certificate
 ---------------------------------------------------------------
 Installing on an AWS RHEL instance -
 
@@ -14,4 +14,10 @@ The hostname needs to match the FQDN
 hostnamectl set-hostname <FQDN>
 
 W/o these 2 steps, the installation doesnt work correctly
+
+Also have to use the self-signed option on AWS
+
+
+
+
 ---------------------------------------------------------------

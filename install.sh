@@ -2,16 +2,16 @@
 #####################################################################
 # This script will install community edition of gitlab on this server
 #####################################################################
-# Start of user inputs
-#SELFSIGNEDCERT="yes"
-SELFSIGNEDCERT="no"
-LETSENCRYPT="yes"
-#LETSENCRYPT="no"
+ Start of user inputs
+SELFSIGNEDCERT="yes"
+#SELFSIGNEDCERT="no"
+#LETSENCRYPT="yes"
+LETSENCRYPT="no"
 # When testing LetsEncrypt has a limit on number of times one can get a new certficate
 # Using the staging flag lets you get a certificate from non trusted CA
 STAGELETSENCRYPT="yes"
 #STAGELETSENCRYPT="no"
-DOMAIN="garfield99992.mylabserver.com"
+DOMAIN="ec2-34-218-252-58.us-west-2.compute.amazonaws.com"
 ADMIN_EMAIL="sgupt9999@gmail.com"
 
 # Firewalld should be up and running to make changes
